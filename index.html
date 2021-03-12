@@ -1,0 +1,40 @@
+<html>
+    <head>
+<title>html2canvas</title>
+<script type="text/javascript" src="./src/htmltosvg.js"></script>
+<style>
+    body{
+        margin:0;
+        padding:0;
+    }
+    .test{
+        color:burlywood;
+        stroke-width: 5;
+    }
+    .back{
+        background: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxMyZZT9Lsj1coqwyocozFazegwBs2-ACAwA&usqp=CAU");
+    }
+</style>
+    </head>
+<body>
+
+    <div id="svgdiv" class="back" >
+
+        <div style="background-color:green
+        ;width: 200px;height: 200px;"></div>
+                <div style="background-color:blue
+                ;width: 200px;height: 200px;"></div>
+                <p>selam naber</p>
+                <h3 class="test">ABİ</h3>
+                <h2>selam</h2>
+                <h1>napıyorsun</h1>
+    </div>
+
+
+    <br/>
+    <hr/>
+    <button type="button" onclick="calculateSvg('svgdiv')">EXPORT SVG</button>
+    <a id="link" onclick="downloadSvg()">TIKLA</a>
+    <script type="text/javascript" src="./src/main.js"></script>
+</body>
+    </html>
