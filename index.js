@@ -2,8 +2,32 @@ let patternCount = 0;
 let htmlToSvgConfig = {
   downloadSvg: true,
 };
+async function addBackground(defs, svgElement, htmlElement) {
+  let style = window.getComputedStyle(htmlElement);
+  const imageProp = await getBackgroundProp(style);
+  var pattern = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "pattern"
+  );
+  const svgImage = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "image"
+  );
+  pattern.id = "pattern" + patternCount;
+  patternCount++;
+  pattern.setAttribute("patternUnits", "userSpaceOnUse");
+  pattern.setAttribute("height", imageProp.height);
+  pattern.setAttribute("width", imageProp.width);
 
-module.exports = async function htmltosvg(idDiv, config = htmlToSvgConfig) {
+  svgImage.setAttribute("height", imageProp.height);
+  svgImage.setAttribute("width", imageProp.width);
+  svgImage.setAttribute("href", imageProp.src);
+  pattern.appendChild(svgImage);
+  svgElement.setAttribute("fill", "url(#" + pattern.id + ")");
+  defs.appendChild(pattern);
+}
+
+module.export = async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   const mainDiv = document.getElementById(idDiv);
   var mainStyle = window.getComputedStyle(mainDiv);
   let width = mainDiv.offsetWidth;
@@ -97,31 +121,6 @@ module.exports = async function htmltosvg(idDiv, config = htmlToSvgConfig) {
   }
   return svg;
 };
-
-async function addBackground(defs, svgElement, htmlElement) {
-  let style = window.getComputedStyle(htmlElement);
-  const imageProp = await getBackgroundProp(style);
-  var pattern = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "pattern"
-  );
-  const svgImage = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "image"
-  );
-  pattern.id = "pattern" + patternCount;
-  patternCount++;
-  pattern.setAttribute("patternUnits", "userSpaceOnUse");
-  pattern.setAttribute("height", imageProp.height);
-  pattern.setAttribute("width", imageProp.width);
-
-  svgImage.setAttribute("height", imageProp.height);
-  svgImage.setAttribute("width", imageProp.width);
-  svgImage.setAttribute("href", imageProp.src);
-  pattern.appendChild(svgImage);
-  svgElement.setAttribute("fill", "url(#" + pattern.id + ")");
-  defs.appendChild(pattern);
-}
 
 function findAllChilds(div) {
   const elements = [];
