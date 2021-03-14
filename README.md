@@ -5,7 +5,7 @@ converts html div to svg images
 ## Install
 
 ```
-$ npm install htmltosvg
+$ npm install htmlsvg
 ```
 
 ## Usage
