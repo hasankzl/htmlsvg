@@ -1,7 +1,7 @@
 <html>
     <head>
 <title>html2canvas</title>
-<script type="text/javascript" src="./src/htmltosvg.js"></script>
+
 <style>
     body{
         margin:0;
@@ -12,25 +12,34 @@
         stroke-width: 5;
     }
     .back{
-        background: url("https://im3.ezgif.com/tmp/ezgif-3-faf9e76c9ef4.png");
+        background: url("https://reasonforexception.com/wp-content/uploads/2021/03/database-152091_960_720.png");
+    }
+    .back2{
+        background: url("https://reasonforexception.com/wp-content/uploads/2021/03/1200px-Picture_icon_BLACK.svg_.png");
     }
 </style>
     </head>
 <body>
 
     <div id="svgdiv" class="back" >
-
-                <p>selam naber</p>
-                <h3 class="test">ABİ</h3>
+        <div style="display: flex;">
+            <div style="width: 300px;height: 300px;background:url('https://reasonforexception.com/wp-content/uploads/2021/03/1200px-Picture_icon_BLACK.svg_.png');"></div>
+            <div style="width: 300px;height: 300px;background-color: red;">
+            <h3>INSIDE A DIV</h3>
+            </div>
+           
+        </div>
+        
+        <p>HTML TO SVG</p>
+                <h3 class="back2">HELLO</h3>
                 <h2>selam</h2>
-                <h1>napıyorsun</h1>
+                <h1>HI</h1>
     </div>
 
 
     <br/>
     <hr/>
-    <button type="button" onclick="calculateSvg('svgdiv')">EXPORT SVG</button>
-    <a id="link" onclick="downloadSvg()">TIKLA</a>
-    <script type="text/javascript" src="./src/main.js"></script>
+    <button type="button" onclick="htmlToSvg('svgdiv')">EXPORT SVG</button>
+    <script type="text/javascript" src="./index.js"></script>
 </body>
     </html>
