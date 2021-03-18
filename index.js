@@ -27,7 +27,7 @@ async function addBackground(defs, svgElement, htmlElement) {
   defs.appendChild(pattern);
 }
 
-module.export = async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
+export async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   const mainDiv = document.getElementById(idDiv);
   var mainStyle = window.getComputedStyle(mainDiv);
   let width = mainDiv.offsetWidth;
@@ -42,7 +42,7 @@ module.export = async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   svg.setAttribute("width", width);
   svg.setAttribute("height", height);
 
-  if (mainStyle.backgroundImage) {
+  if (mainStyle.backgroundImage !== "none") {
     const svgRect = document.createElementNS(
       "http://www.w3.org/2000/svg",
       "rect"
@@ -120,7 +120,7 @@ module.export = async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
     downloadSvg(svg);
   }
   return svg;
-};
+}
 
 function findAllChilds(div) {
   const elements = [];
@@ -138,6 +138,7 @@ function findAllChilds(div) {
 }
 
 function getBackgroundProp(style) {
+  debugger;
   let prop;
   var src = style.backgroundImage
     .replace(/url\((['"])?(.*?)\1\)/gi, "$2")

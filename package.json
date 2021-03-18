@@ -1,6 +1,6 @@
 {
   "name": "htmlsvg",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "convert html code to svg",
   "main": "index.js",
   "scripts": {
