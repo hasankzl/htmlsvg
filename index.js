@@ -5,6 +5,7 @@ let htmlToSvgConfig = {
 async function addBackground(defs, svgElement, htmlElement) {
   let style = window.getComputedStyle(htmlElement);
   const imageProp = await getBackgroundProp(style);
+
   var pattern = document.createElementNS(
     "http://www.w3.org/2000/svg",
     "pattern"
@@ -22,6 +23,8 @@ async function addBackground(defs, svgElement, htmlElement) {
   svgImage.setAttribute("height", imageProp.height);
   svgImage.setAttribute("width", imageProp.width);
   svgImage.setAttribute("href", imageProp.src);
+  svgImage.setAttribute("x", svgElement.getAttribute("x"));
+  svgImage.setAttribute("y", svgElement.getAttribute("y"));
   pattern.appendChild(svgImage);
   svgElement.setAttribute("fill", "url(#" + pattern.id + ")");
   defs.appendChild(pattern);
@@ -30,6 +33,7 @@ async function addBackground(defs, svgElement, htmlElement) {
 export async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   const mainDiv = document.getElementById(idDiv);
   var mainStyle = window.getComputedStyle(mainDiv);
+  var mainDivPosition = mainDiv.getBoundingClientRect();
   let width = mainDiv.offsetWidth;
   let height = mainDiv.offsetHeight;
   var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -61,43 +65,28 @@ export async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   for (var i = 1; i < elements.length; i++) {
     const htmlElement = elements[i];
     var style = window.getComputedStyle(htmlElement);
-    let svgElement;
-    switch (htmlElement.tagName) {
-      case "P":
-      case "H3":
-      case "H1":
-      case "H2":
-      case "H4":
-      case "H5":
-        svgElement = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "text"
-        );
-        svgElement.innerHTML = htmlElement.innerHTML;
-        svgElement.setAttribute("fill", style.color);
-        svgElement.setAttribute("font-family", style.fontFamily);
-        svgElement.setAttribute("font-size", style.fontSize);
-        svgElement.setAttribute("font-stretch", style.fontStretch);
-        svgElement.setAttribute("font-size-adjust", style.fontSizeAdjust);
-        svgElement.setAttribute("font-variant", style.fontVariant);
-        svgElement.setAttribute("font-weight", style.fontWeight);
-        break;
-      case "DIV":
-        svgElement = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "rect"
-        );
-
-        break;
+    let svgElement = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "rect"
+    );
+    let svgText;
+    if (svgElement.classList) {
+      svgElement.classList = htmlElement.classList;
     }
+    copyNodeStyle(htmlElement, svgElement);
 
-    svgElement.classList = htmlElement.classList;
     var position = htmlElement.getBoundingClientRect();
-    var x = parseInt(position.left) + parseInt(style.marginLeft.slice(0, -2));
-    var y = parseInt(position.top) + parseInt(style.marginBottom.slice(0, -2));
-    let width = style.width;
-    let height = style.height;
+    var x = parseInt(position.left) - parseInt(mainDivPosition.left);
+    var y = parseInt(position.top) - parseInt(mainDivPosition.top);
 
+    let width =
+      parseInt(style.width.slice(0, -2)) +
+      parseInt(style.paddingLeft.slice(0, -2)) +
+      parseInt(style.paddingRight.slice(0, -2));
+    let height =
+      parseInt(style.height.slice(0, -2)) +
+      parseInt(style.paddingTop.slice(0, -2)) +
+      parseInt(style.paddingBottom.slice(0, -2));
     svgElement.setAttribute("width", width);
     svgElement.setAttribute("height", height);
     svgElement.setAttribute("x", x);
@@ -108,16 +97,51 @@ export async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
       await addBackground(defs, svgElement, htmlElement);
 
       svgElement.style.backgroundImage = style.backgroundImage;
-    } else if (htmlElement.style.backgroundColor) {
-      svgElement.setAttribute("fill", htmlElement.style.backgroundColor);
+    } else if (style.backgroundColor) {
+      svgElement.setAttribute("fill", style.backgroundColor);
     } else if (htmlElement.tagName == "DIV") {
       svgElement.setAttribute("fill-opacity", 0);
     }
+    switch (htmlElement.tagName) {
+      case "P":
+      case "H3":
+      case "H1":
+      case "H2":
+      case "H4":
+      case "H5":
+        svgText = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text"
+        );
+        svgText.innerHTML = htmlElement.innerHTML;
+        svgText.setAttribute("fill", style.color);
+        svgText.setAttribute("font-family", style.fontFamily);
+        svgText.setAttribute("font-size", style.fontSize);
+        svgText.setAttribute("font-stretch", style.fontStretch);
+        svgText.setAttribute("font-size-adjust", style.fontSizeAdjust);
+        svgText.setAttribute("font-variant", style.fontVariant);
+        svgText.setAttribute("font-weight", style.fontWeight);
+        x += parseInt(style.paddingLeft.slice(0, -2));
+        y +=
+          parseInt(style.paddingTop.slice(0, -2)) +
+          parseInt(style.fontSize.slice(0, -2)) -
+          2;
+
+        svgText.setAttribute("x", x);
+        svgText.setAttribute("y", y);
+
+        break;
+    }
     svg.appendChild(svgElement);
+
+    if (svgText) {
+      svg.appendChild(svgText);
+    }
   }
   svg.appendChild(defs);
   if (config.downloadSvg) {
     downloadSvg(svg);
+    document.body.appendChild(svg);
   }
   return svg;
 }
@@ -138,7 +162,6 @@ function findAllChilds(div) {
 }
 
 function getBackgroundProp(style) {
-  debugger;
   let prop;
   var src = style.backgroundImage
     .replace(/url\((['"])?(.*?)\1\)/gi, "$2")
@@ -162,27 +185,43 @@ function downloadSvg(svg) {
   var serializer = new XMLSerializer();
   var source = serializer.serializeToString(svg);
 
-  //add name spaces.
-  if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+  // for ie
+  if (window.navigator.msSaveBlob) {
+    var blob = new Blob([source], {
+      type: "data:image/svg+xml;charset=utf-8;",
+    });
+    window.navigator.msSaveOrOpenBlob(blob, "htmltosvg.svg");
+  } else {
+    if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+      source = source.replace(
+        /^<svg/,
+        '<svg xmlns="http://www.w3.org/2000/svg"'
+      );
+    }
+    if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+      source = source.replace(
+        /^<svg/,
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
+      );
+    }
+
+    //add xml declaration
+    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+    //convert svg source to URI data scheme.
+    var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+
+    var downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = "htmlToSvg.svg";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   }
-  if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-    source = source.replace(
-      /^<svg/,
-      '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
-    );
-  }
+}
 
-  //add xml declaration
-  source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-
-  //convert svg source to URI data scheme.
-  var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
-
-  var downloadLink = document.createElement("a");
-  downloadLink.href = url;
-  downloadLink.download = "htmlToSvg.svg";
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
+function copyNodeStyle(sourceNode, targetNode) {
+  var computedStyle = window.getComputedStyle(sourceNode);
+  targetNode.style.opacity = computedStyle.opacity;
+  targetNode.style.border = computedStyle.border;
 }

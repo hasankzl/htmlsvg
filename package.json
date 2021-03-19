@@ -1,6 +1,6 @@
 {
   "name": "htmlsvg",
-  "version": "1.0.7",
+  "version": "1.1.9",
   "description": "convert html code to svg",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,9 @@
     "convert",
     "html",
     "to",
-    "svg"
+    "svg",
+    "react html to svg",
+    "htmltosvg"
   ],
   "author": "mhasankzl",
   "license": "ISC",

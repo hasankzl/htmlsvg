@@ -20,7 +20,7 @@ console.log(svg);
 You can directly download svg with passing config object
 
 ```js
-const htmlToSvg = require("htmlsvg");
+import htmlToSvg from "htmlsvg";
 
 const svgConfig = {
   download: true,
