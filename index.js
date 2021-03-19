@@ -1,6 +1,7 @@
 let patternCount = 0;
 let htmlToSvgConfig = {
   downloadSvg: true,
+  filename: "htmlsvg",
 };
 async function addBackground(defs, svgElement, htmlElement) {
   let style = window.getComputedStyle(htmlElement);
@@ -30,7 +31,7 @@ async function addBackground(defs, svgElement, htmlElement) {
   defs.appendChild(pattern);
 }
 
-export async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
+export default async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   const mainDiv = document.getElementById(idDiv);
   var mainStyle = window.getComputedStyle(mainDiv);
   var mainDivPosition = mainDiv.getBoundingClientRect();
@@ -103,12 +104,26 @@ export async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
       svgElement.setAttribute("fill-opacity", 0);
     }
     switch (htmlElement.tagName) {
+      case "IMG":
+        svgImage = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "image"
+        );
+        svgImage.setAttribute("href", htmlElement.src);
+        svgImage.setAttribute("width", width);
+        svgImage.setAttribute("height", height);
+        svgImage.setAttribute("x", x);
+        svgImage.setAttribute("y", y);
+        svgElement = svgImage;
+        break;
       case "P":
       case "H3":
       case "H1":
       case "H2":
       case "H4":
       case "H5":
+      case "SPAN":
+      case "BUTTON":
         svgText = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "text"
@@ -140,7 +155,7 @@ export async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   }
   svg.appendChild(defs);
   if (config.downloadSvg) {
-    downloadSvg(svg);
+    downloadSvg(svg, config.filename);
     document.body.appendChild(svg);
   }
   return svg;
@@ -180,7 +195,7 @@ function getBackgroundProp(style) {
   });
 }
 
-function downloadSvg(svg) {
+function downloadSvg(svg, filename) {
   //get svg source.
   var serializer = new XMLSerializer();
   var source = serializer.serializeToString(svg);
@@ -190,7 +205,7 @@ function downloadSvg(svg) {
     var blob = new Blob([source], {
       type: "data:image/svg+xml;charset=utf-8;",
     });
-    window.navigator.msSaveOrOpenBlob(blob, "htmltosvg.svg");
+    window.navigator.msSaveOrOpenBlob(blob, filename + ".svg");
   } else {
     if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
       source = source.replace(
@@ -213,7 +228,7 @@ function downloadSvg(svg) {
 
     var downloadLink = document.createElement("a");
     downloadLink.href = url;
-    downloadLink.download = "htmlToSvg.svg";
+    downloadLink.download = filename + ".svg";
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
