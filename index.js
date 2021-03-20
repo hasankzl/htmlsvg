@@ -156,7 +156,6 @@ export default async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
   svg.appendChild(defs);
   if (config.downloadSvg) {
     downloadSvg(svg, config.filename);
-    document.body.appendChild(svg);
   }
   return svg;
 }

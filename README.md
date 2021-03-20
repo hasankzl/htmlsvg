@@ -24,6 +24,7 @@ import htmlToSvg from "htmlsvg";
 
 const svgConfig = {
   download: true,
+  filename: "htmltosvg",
 };
 const svg = await htmlToSvg("divId", svgConfig);
 console.log(svg);
