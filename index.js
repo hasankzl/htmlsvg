@@ -31,8 +31,7 @@ async function addBackground(defs, svgElement, htmlElement) {
   defs.appendChild(pattern);
 }
 
-export default async function htmlToSvg(idDiv, config = htmlToSvgConfig) {
-  const mainDiv = document.getElementById(idDiv);
+export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
   var mainStyle = window.getComputedStyle(mainDiv);
   var mainDivPosition = mainDiv.getBoundingClientRect();
   let width = mainDiv.offsetWidth;
