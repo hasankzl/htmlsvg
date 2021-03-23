@@ -12,7 +12,7 @@ $ npm install htmlsvg
 
 ```js
 import htmlToSvg from "htmlsvg";
-const htmlElement = document.getElementById("id");
+const htmlElement = document.getElementById("DivId");
 const svg = await htmlToSvg(htmlElement);
 console.log(svg);
 ```
@@ -26,7 +26,7 @@ const svgConfig = {
   download: true,
   filename: "htmltosvg",
 };
-const htmlElement = document.getElementById("id");
+const htmlElement = document.getElementById("DivId");
 const svg = await htmlToSvg(htmlElement, svgConfig);
 console.log(svg);
 ```

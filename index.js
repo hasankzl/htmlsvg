@@ -65,6 +65,7 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
   for (var i = 1; i < elements.length; i++) {
     const htmlElement = elements[i];
     var style = window.getComputedStyle(htmlElement);
+    var elementPosition = htmlElement.getBoundingClientRect();
     let svgElement = document.createElementNS(
       "http://www.w3.org/2000/svg",
       "rect"
@@ -80,11 +81,11 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
     var y = parseInt(position.top) - parseInt(mainDivPosition.top);
 
     let width =
-      parseInt(style.width.slice(0, -2)) +
+      parseInt(elementPosition.width) +
       parseInt(style.paddingLeft.slice(0, -2)) +
       parseInt(style.paddingRight.slice(0, -2));
     let height =
-      parseInt(style.height.slice(0, -2)) +
+      parseInt(elementPosition.height) +
       parseInt(style.paddingTop.slice(0, -2)) +
       parseInt(style.paddingBottom.slice(0, -2));
     svgElement.setAttribute("width", width);
