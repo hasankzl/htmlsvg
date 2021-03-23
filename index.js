@@ -1,6 +1,6 @@
 let patternCount = 0;
 let htmlToSvgConfig = {
-  downloadSvg: true,
+  downloadSvg: false,
   filename: "htmlsvg",
 };
 async function addBackground(defs, svgElement, htmlElement) {
@@ -80,14 +80,8 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
     var x = parseInt(position.left) - parseInt(mainDivPosition.left);
     var y = parseInt(position.top) - parseInt(mainDivPosition.top);
 
-    let width =
-      parseInt(elementPosition.width) +
-      parseInt(style.paddingLeft.slice(0, -2)) +
-      parseInt(style.paddingRight.slice(0, -2));
-    let height =
-      parseInt(elementPosition.height) +
-      parseInt(style.paddingTop.slice(0, -2)) +
-      parseInt(style.paddingBottom.slice(0, -2));
+    let width = parseInt(elementPosition.width);
+    let height = parseInt(elementPosition.height);
     svgElement.setAttribute("width", width);
     svgElement.setAttribute("height", height);
     svgElement.setAttribute("x", x);
@@ -103,7 +97,7 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
     } else if (htmlElement.tagName == "DIV") {
       svgElement.setAttribute("fill-opacity", 0);
     }
-    switch (htmlElement.tagName) {
+    switch (htmlElement.tagName.toUpperCase()) {
       case "IMG":
         svgImage = document.createElementNS(
           "http://www.w3.org/2000/svg",

@@ -1,6 +1,10 @@
-# htmlToSvg
+# htmlsvg
 
-converts html div to svg images
+converts html element to svg element (rect,text,img).
+
+### online demo:
+
+https://htmlsvg.netlify.app/
 
 ## Install
 
