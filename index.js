@@ -1,11 +1,28 @@
 let patternCount = 0;
+
 let htmlToSvgConfig = {
   downloadSvg: false,
+  downloadPng: false,
   filename: "htmlsvg",
+  convertDataUrl: false,
 };
-async function addBackground(defs, svgElement, htmlElement) {
+
+const toDataURL = (url) =>
+  fetch(url)
+    .then((response) => response.blob())
+    .then(
+      (blob) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        })
+    );
+
+async function addBackground(defs, svgElement, htmlElement, convertDataUrl) {
   let style = window.getComputedStyle(htmlElement);
-  const imageProp = await getBackgroundProp(style);
+  imageProp = await getBackgroundProp(style);
 
   var pattern = document.createElementNS(
     "http://www.w3.org/2000/svg",
@@ -23,7 +40,14 @@ async function addBackground(defs, svgElement, htmlElement) {
 
   svgImage.setAttribute("height", imageProp.height);
   svgImage.setAttribute("width", imageProp.width);
-  svgImage.setAttribute("href", imageProp.src);
+
+  if (convertDataUrl) {
+    await toDataURL(imageProp.src).then((dataUrl) => {
+      svgImage.setAttribute("href", dataUrl);
+    });
+  } else {
+    svgImage.setAttribute("href", imageProp.src);
+  }
   svgImage.setAttribute("x", svgElement.getAttribute("x"));
   svgImage.setAttribute("y", svgElement.getAttribute("y"));
   pattern.appendChild(svgImage);
@@ -56,7 +80,7 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
     svgRect.setAttribute("width", width);
     svgRect.setAttribute("height", height);
 
-    await addBackground(defs, svgRect, mainDiv);
+    await addBackground(defs, svgRect, mainDiv, config.convertDataUrl);
 
     svg.appendChild(svgRect);
   }
@@ -86,10 +110,9 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
     svgElement.setAttribute("height", height);
     svgElement.setAttribute("x", x);
     svgElement.setAttribute("y", y);
-
     // if div has a background image then create a image pattern
     if (style.backgroundImage != "none") {
-      await addBackground(defs, svgElement, htmlElement);
+      await addBackground(defs, svgElement, htmlElement, config.convertDataUrl);
 
       svgElement.style.backgroundImage = style.backgroundImage;
     } else if (style.backgroundColor) {
@@ -103,7 +126,13 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
           "http://www.w3.org/2000/svg",
           "image"
         );
-        svgImage.setAttribute("href", htmlElement.src);
+        if (config.convertDataUrl) {
+          await toDataURL(htmlElement.src).then((dataUrl) => {
+            svgImage.setAttribute("href", dataUrl);
+          });
+        } else {
+          svgImage.setAttribute("href", htmlElement.src);
+        }
         svgImage.setAttribute("width", width);
         svgImage.setAttribute("height", height);
         svgImage.setAttribute("x", x);
@@ -151,9 +180,29 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
   if (config.downloadSvg) {
     downloadSvg(svg, config.filename);
   }
+  if (config.downloadPng) {
+    downloadPng(svg, config.filename);
+  }
   return svg;
 }
+function downloadPng(svg, filename) {
+  var svgData = new XMLSerializer().serializeToString(svg);
+  var canvas = document.createElement("canvas");
+  var ctx = canvas.getContext("2d");
 
+  canvas.width = svg.getAttribute("width");
+  canvas.height = svg.getAttribute("height");
+  var img = document.createElement("img");
+  img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
+  var link = document.createElement("a");
+  link.download = filename + ".png";
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0);
+    // Now is done
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+}
 function findAllChilds(div) {
   const elements = [];
   function _findAllChilds(_div) {

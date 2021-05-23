@@ -1,7 +1,7 @@
 {
   "name": "htmlsvg",
-  "version": "1.1.17",
-  "description": "convert html code to svg",
+  "version": "1.2.1",
+  "description": "convert html code to svg and download svg or png",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
