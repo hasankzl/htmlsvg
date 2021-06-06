@@ -22,7 +22,7 @@ const toDataURL = (url) =>
 
 async function addBackground(defs, svgElement, htmlElement, convertDataUrl) {
   let style = window.getComputedStyle(htmlElement);
-  imageProp = await getBackgroundProp(style);
+  let imageProp = await getBackgroundProp(style);
 
   var pattern = document.createElementNS(
     "http://www.w3.org/2000/svg",
@@ -111,7 +111,7 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
     svgElement.setAttribute("x", x);
     svgElement.setAttribute("y", y);
     // if div has a background image then create a image pattern
-    if (style.backgroundImage != "none") {
+    if (style.backgroundImage !== "none") {
       await addBackground(defs, svgElement, htmlElement, config.convertDataUrl);
 
       svgElement.style.backgroundImage = style.backgroundImage;
@@ -122,7 +122,7 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
     }
     switch (htmlElement.tagName.toUpperCase()) {
       case "IMG":
-        svgImage = document.createElementNS(
+        let svgImage = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "image"
         );
@@ -146,6 +146,8 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
       case "H4":
       case "H5":
       case "SPAN":
+      case "TD":
+      case "TH":
       case "BUTTON":
         svgText = document.createElementNS(
           "http://www.w3.org/2000/svg",
@@ -168,6 +170,8 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
         svgText.setAttribute("x", x);
         svgText.setAttribute("y", y);
 
+        break;
+      default:
         break;
     }
     svg.appendChild(svgElement);
