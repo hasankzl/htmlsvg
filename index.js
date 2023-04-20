@@ -64,6 +64,7 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
   var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+  // add namespaces to handle group properties well
   svg.setAttribute("xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape");
   svg.setAttribute("xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd");
   svg.setAttribute("xmlns:svg", "http://www.w3.org/2000/svg");
