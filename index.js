@@ -64,11 +64,16 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
   var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+  svg.setAttribute("xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape");
+  svg.setAttribute("xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd");
+  svg.setAttribute("xmlns:svg", "http://www.w3.org/2000/svg");
   svg.classList = mainDiv.classList;
   svg.style = mainDiv.style;
   svg.id = "svg";
   svg.setAttribute("width", width);
   svg.setAttribute("height", height);
+  // make the SVG responsive
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
   if (mainStyle.backgroundImage !== "none") {
     const svgRect = document.createElementNS(
@@ -139,6 +144,33 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
         svgImage.setAttribute("y", y);
         svgElement = svgImage;
         break;
+      case "SVG":
+        /**
+         * most elegant solution would be to nest the SVG but,
+         * nested SVGs do not maintain position when opened in Ai
+         *
+         * svgElement = htmlElement.cloneNode(true);
+         *
+         * workaround: transform the SVGs in groups <g> and
+         * adjust the position with transform="translate(x y)"
+         */
+        svgElement = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+        svgElement.innerHTML = htmlElement.innerHTML;
+        svgElement.setAttribute("transform", `translate(${x} ${y})`);
+        /**
+         * when using viewBox, use this:
+         * the output SVG is bigger and the group gets by default centered,
+         * so we need to translate the group
+         *
+         * const outputSvgHeight = mainDiv.offsetHeight;
+         * const thisSVGHeight = htmlElement.getBBox().height;
+         * let translateY = -(outputSvgHeight - thisSVGHeight) / 2;
+         * svgElement.setAttribute("transform", `translate(0 ${translateY}) scale(1)`);
+         */
+        break;
       case "P":
       case "H3":
       case "H1":
@@ -174,10 +206,10 @@ export default async function htmlToSvg(mainDiv, config = htmlToSvgConfig) {
       default:
         break;
     }
-    svg.appendChild(svgElement);
-
     if (svgText) {
       svg.appendChild(svgText);
+    } else {
+      svg.appendChild(svgElement);
     }
   }
   svg.appendChild(defs);
@@ -211,6 +243,8 @@ function findAllChilds(div) {
   const elements = [];
   function _findAllChilds(_div) {
     elements.push(_div);
+    // do not parse SVGs
+    if (_div.tagName.toUpperCase() == "SVG") return;
     if (_div.hasChildNodes()) {
       var searchEles = _div.children;
       for (var i = 0; i < searchEles.length; i++) {
